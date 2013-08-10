@@ -9,21 +9,24 @@ use Graph;
 
 {
     no strict 'refs';
-    *{"DBIx::Class::Schema::toposort"} = sub {
+    *{"DBIx::Class::Schema::toposort_graph"} = sub {
         my $self = shift;
+        my (%opts) = @_;
+
         my $g = Graph->new;
 
-        my @s = $self->sources;
+        my @source_names = $self->sources;
 
         my %table_source = map { 
             $self->source($_)->name => $_
-        } @s;
+        } @source_names;
 
-        foreach my $name ( @s ) {
+        foreach my $name ( @source_names ) {
             my $source = $self->source($name);
             $g->add_vertex($name);
 
             foreach my $rel_name ( $source->relationships ) {
+                next if grep { $_ eq $rel_name } @{$opts{skip}{$name}};
                 my $rel_info = $source->relationship_info($rel_name);
 
                 if ( $rel_info->{attrs}{is_foreign_key_constraint} ) {
@@ -35,7 +38,11 @@ use Graph;
             }
         }
 
-        return $g->topological_sort();
+        return $g;
+    };
+    *{"DBIx::Class::Schema::toposort"} = sub {
+        my $self = shift;
+        return $self->toposort_graph(@_)->toposort();
     };
 }
 
