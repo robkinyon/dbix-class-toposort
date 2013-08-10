@@ -9,7 +9,7 @@ use warnings FATAL => 'all';
     no strict 'refs';
     *{"DBIx::Class::Schema::toposort"} = sub {
         my $self = shift;
-        return $self->sources;
+        return sort $self->sources;
     };
 }
 

@@ -6,4 +6,6 @@ MANIFEST
 META.yml
 README
 t/00_load.t
+t/01.t
+t/02.t
 META.json
