@@ -38,6 +38,6 @@ use Test::DBIx::Class qw(:resultsets);
 use_ok 'DBIx::Class::TopoSort';
 
 my @tables = Schema->toposort();
-cmp_deeply( [@tables], ['Artist', 'Track'], "Unconnected tables are returned in lexicographic order" );
+cmp_bag( [@tables], ['Artist', 'Track'], "Unconnected tables are returned in lexicographic order" );
 
 done_testing;

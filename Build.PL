@@ -5,17 +5,14 @@ use warnings FATAL => 'all';
 
 my $build = Module::Build->new(
     module_name => 'DBIx::Class::TopoSort',
+    all_from => 'lib/DBIx/Class/TopoSort.pm',
     license => 'perl',
     requires => {
         'perl'  => '5.008_004',
         'Graph' => '0.96',
     },
     build_requires => {
-        #'File::Path'      => '0.01',
-        #'File::Temp'      => '0.01',
-        #'Pod::Usage'      => '1.3',
-        #'Test::Warn'      => '0.08',
-        #'Test::Exception' => '0.21',
+        'Test::Exception'   => '0.21',
         'Test::DBIx::Class' => '0.01',
         'Test::More'        => '0.88', # done_testing
         'Test::Deep'        => '0.01',
@@ -25,7 +22,7 @@ my $build = Module::Build->new(
     add_to_cleanup => [
         'META.yml', '*.bak', '*.gz', 'Makefile.PL', 'cover_db',
     ],
-    test_files => 't/??_*.t',
+    test_files => 't/??*.t',
     meta_merge => {
         resources => {
             repository => 'https://github.com/robkinyon/dbix-class-toposort',

@@ -69,6 +69,6 @@ use Test::DBIx::Class qw(:resultsets);
 use_ok 'DBIx::Class::TopoSort';
 
 my @tables = Schema->toposort();
-cmp_deeply( [@tables], ['Artist', 'Studio', 'Album', 'Track'], "Connected tables are returned in has_many order" );
+cmp_bag( [@tables], ['Artist', 'Studio', 'Album', 'Track'], "Connected tables are returned in has_many order" );
 
 done_testing;
