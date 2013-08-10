@@ -7,7 +7,8 @@ my $build = Module::Build->new(
     module_name => 'DBIx::Class::TopoSort',
     license => 'perl',
     requires => {
-        'perl'              => '5.008_004',
+        'perl'  => '5.008_004',
+        'Graph' => '0.96',
     },
     build_requires => {
         #'File::Path'      => '0.01',
@@ -20,7 +21,7 @@ my $build = Module::Build->new(
         'Test::Deep'        => '0.01',
     },
     create_makefile_pl => 'traditional',
-    create_readme    =>  1,
+    create_readme  =>  1,
     add_to_cleanup => [
         'META.yml', '*.bak', '*.gz', 'Makefile.PL', 'cover_db',
     ],
