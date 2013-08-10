@@ -10,11 +10,7 @@ BEGIN {
         use base 'DBIx::Class::Core';
         __PACKAGE__->table('artists');
         __PACKAGE__->add_columns(
-            id => {
-                data_type => 'int',
-                is_nullable => 0,
-                is_auto_increment => 1,
-            },
+            id => 'int',
         );
         __PACKAGE__->set_primary_key('id');
     }
@@ -22,13 +18,9 @@ BEGIN {
     {
         package MyApp::Schema::Result::Track;
         use base 'DBIx::Class::Core';
-        __PACKAGE__->table('trakcs');
+        __PACKAGE__->table('tracks');
         __PACKAGE__->add_columns(
-            id => {
-                data_type => 'int',
-                is_nullable => 0,
-                is_auto_increment => 1,
-            },
+            id => 'int',
         );
         __PACKAGE__->set_primary_key('id');
     }
