@@ -36,12 +36,11 @@ BEGIN {
         use base 'DBIx::Class::Schema';
         __PACKAGE__->register_class(Artist => 'MyApp::Schema::Result::Artist');
         __PACKAGE__->register_class(Album => 'MyApp::Schema::Result::Album');
+        __PACKAGE__->load_components('TopoSort');
     }
 }
 
 use Test::DBIx::Class qw(:resultsets);
-
-use_ok 'DBIx::Class::TopoSort';
 
 dies_ok { Schema->toposort() } 'toposort dies with a cycle';
 

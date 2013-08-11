@@ -7,47 +7,43 @@ use warnings FATAL => 'all';
 
 our $VERSION = 0.01;
 
-{
-    package DBIx::Class::Schema;
+use Graph;
 
-    use Graph;
+sub toposort_graph {
+    my $self = shift;
+    my (%opts) = @_;
 
-    sub toposort_graph {
-        my $self = shift;
-        my (%opts) = @_;
+    my $g = Graph->new;
 
-        my $g = Graph->new;
+    my @source_names = $self->sources;
 
-        my @source_names = $self->sources;
+    my %table_source = map { 
+        $self->source($_)->name => $_
+    } @source_names;
 
-        my %table_source = map { 
-            $self->source($_)->name => $_
-        } @source_names;
+    foreach my $name ( @source_names ) {
+        my $source = $self->source($name);
+        $g->add_vertex($name);
 
-        foreach my $name ( @source_names ) {
-            my $source = $self->source($name);
-            $g->add_vertex($name);
+        foreach my $rel_name ( $source->relationships ) {
+            next if grep { $_ eq $rel_name } @{$opts{skip}{$name}};
+            my $rel_info = $source->relationship_info($rel_name);
 
-            foreach my $rel_name ( $source->relationships ) {
-                next if grep { $_ eq $rel_name } @{$opts{skip}{$name}};
-                my $rel_info = $source->relationship_info($rel_name);
-
-                if ( $rel_info->{attrs}{is_foreign_key_constraint} ) {
-                    $g->add_edge(
-                        $table_source{$self->source($rel_info->{source})->name},
-                        $name,
-                    );
-                }
+            if ( $rel_info->{attrs}{is_foreign_key_constraint} ) {
+                $g->add_edge(
+                    $table_source{$self->source($rel_info->{source})->name},
+                    $name,
+                );
             }
         }
-
-        return $g;
     }
 
-    sub toposort {
-        my $self = shift;
-        return $self->toposort_graph(@_)->toposort();
-    }
+    return $g;
+}
+
+sub toposort {
+    my $self = shift;
+    return $self->toposort_graph(@_)->toposort();
 }
 
 1;
@@ -59,8 +55,22 @@ DBIx::Class::TopoSort - The addition of topological sorting to DBIx::Class
 
 =head1 SYNOPSIS
 
+Within your schema class:
+
+  __PACKAGE__->load_components('TopoSort');
+
+Later:
+
   my $schema = Your::App::Schema->connect(...);
   my @toposorted_sourcenames = $schema->toposort();
+
+If you have a cycle in your relationships
+
+  my @toposorted_sourcenames = $schema->toposort(
+      skip => {
+          Artist => [qw/ first_album /],
+      },
+  );
 
 =head1 DESCRIPTION
 
@@ -111,7 +121,7 @@ names.
 
   skip => {
       Artist => [ qw/ first_album / ],
-  }
+  },
 
 =back
 

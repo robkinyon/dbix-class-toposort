@@ -19,12 +19,11 @@ BEGIN {
         package MyApp::Schema;
         use base 'DBIx::Class::Schema';
         __PACKAGE__->register_class(Artist => 'MyApp::Schema::Result::Artist');
+        __PACKAGE__->load_components('TopoSort');
     }
 }
 
 use Test::DBIx::Class qw(:resultsets);
-
-use_ok 'DBIx::Class::TopoSort';
 
 my @tables = Schema->toposort();
 cmp_deeply( [@tables], ['Artist'], "One table toposort is just the table" );

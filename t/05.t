@@ -62,12 +62,11 @@ BEGIN {
         __PACKAGE__->register_class(Album => 'MyApp::Schema::Result::Album');
         __PACKAGE__->register_class(Studio => 'MyApp::Schema::Result::Studio');
         __PACKAGE__->register_class(Track => 'MyApp::Schema::Result::Track');
+        __PACKAGE__->load_components('TopoSort');
     }
 }
 
 use Test::DBIx::Class qw(:resultsets);
-
-use_ok 'DBIx::Class::TopoSort';
 
 sub is_before {
     my ($list, $first, $second) = @_;
