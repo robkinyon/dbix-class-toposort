@@ -7,11 +7,12 @@ use warnings FATAL => 'all';
 
 our $VERSION = 0.01;
 
-use Graph;
-
 {
-    no strict 'refs';
-    *{"DBIx::Class::Schema::toposort_graph"} = sub {
+    package DBIx::Class::Schema;
+
+    use Graph;
+
+    sub toposort_graph {
         my $self = shift;
         my (%opts) = @_;
 
@@ -41,11 +42,12 @@ use Graph;
         }
 
         return $g;
-    };
-    *{"DBIx::Class::Schema::toposort"} = sub {
+    }
+
+    sub toposort {
         my $self = shift;
         return $self->toposort_graph(@_)->toposort();
-    };
+    }
 }
 
 1;

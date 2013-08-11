@@ -16,6 +16,7 @@ my $build = Module::Build->new(
         'Test::DBIx::Class' => '0.01',
         'Test::More'        => '0.88', # done_testing
         'Test::Deep'        => '0.01',
+        'List::MoreUtils'   => '0.01', # first_index
     },
     create_makefile_pl => 'traditional',
     create_readme  =>  1,

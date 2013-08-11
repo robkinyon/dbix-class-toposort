@@ -3,6 +3,7 @@ use warnings FATAL => 'all';
 
 use Test::More;
 use Test::Deep;
+use List::MoreUtils qw( first_index );
 
 BEGIN {
     {
@@ -54,7 +55,21 @@ use Test::DBIx::Class qw(:resultsets);
 
 use_ok 'DBIx::Class::TopoSort';
 
+sub is_before {
+    my ($list, $first, $second) = @_;
+    my $f = first_index { $_ eq $first } @$list;
+    my $s = first_index { $_ eq $second } @$list;
+    return $f < $s;
+}
+
 my @tables = Schema->toposort();
-cmp_bag( [@tables], ['Artist', 'Album', 'Track'], "Connected tables are returned in has_many order" );
+ok(
+    is_before(\@tables, 'Artist', 'Album'),
+    "Artist is before Album",
+);
+ok(
+    is_before(\@tables, 'Album', 'Track'),
+    "Album is before Track",
+);
 
 done_testing;

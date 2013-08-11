@@ -48,6 +48,6 @@ dies_ok { Schema->toposort() } 'toposort dies with a cycle';
 my @tables = Schema->toposort(skip => {
     'Artist' => [qw/ first_album /],
 });
-cmp_bag( [@tables], ['Artist', 'Album'], "Connected tables are returned in has_many order" );
+cmp_deeply( [@tables], ['Artist', 'Album'], "Connected tables are returned in has_many order" );
 
 done_testing;
