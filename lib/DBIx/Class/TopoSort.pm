@@ -129,6 +129,14 @@ names.
 
 L<Graph/toposort>
 
+=head1 AUTHOR
+
+=over 4
+
+=item * Rob Kinyon <rob.kinyon@gmail.com>
+
+=back
+
 =head1 LICENSE
 
 Copyright (c) 2013 Rob Kinyon. All Rights Reserved.
