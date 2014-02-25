@@ -5,24 +5,24 @@ use 5.008_004;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.04';
+our $VERSION = '0.040001';
 
 use Graph;
 
 sub toposort_graph {
     my $self = shift;
-    my (%opts) = @_;
+    my ($schema, %opts) = @_;
 
     my $g = Graph->new;
 
-    my @source_names = $self->sources;
+    my @source_names = $schema->sources;
 
     my %table_source = map { 
-        $self->source($_)->name => $_
+        $schema->source($_)->name => $_
     } @source_names;
 
     foreach my $name ( @source_names ) {
-        my $source = $self->source($name);
+        my $source = $schema->source($name);
         $g->add_vertex($name);
 
         foreach my $rel_name ( $source->relationships ) {
@@ -31,7 +31,7 @@ sub toposort_graph {
 
             if ( $rel_info->{attrs}{is_foreign_key_constraint} ) {
                 $g->add_edge(
-                    $table_source{$self->source($rel_info->{source})->name},
+                    $table_source{$schema->source($rel_info->{source})->name},
                     $name,
                 );
             }
@@ -43,7 +43,14 @@ sub toposort_graph {
 
 sub toposort {
     my $self = shift;
-    return $self->toposort_graph(@_)->toposort();
+    my $schema;
+    if (ref($self) && $self->isa('DBIx::Class::Schema')) {
+        $schema = $self;
+    }
+    else {
+        $schema = shift(@_);
+    }
+    return $self->toposort_graph($schema, @_)->toposort();
 }
 
 1;
@@ -71,6 +78,10 @@ If you have a cycle in your relationships
           Artist => [qw/ first_album /],
       },
   );
+
+Alternately:
+
+  my @toposorted_sourcenames = DBIx::Class::TopoSort->toposort($schema);
 
 =head1 DESCRIPTION
 
@@ -101,6 +112,15 @@ section on TOPOLOGICAL SORT.
 
 This method will throw an error if there are any cycles in your tables. You will
 need to specify the skip parameter (described below) to break those cycles.
+
+=head2 toposort (Class method)
+
+Alternately, if you do not wish to use TopoSort as a component, you can call it
+as a class method on this class. The toposort() method is smart enough to
+distinguish.
+
+Note: toposort_graph() does B<not> distinguish - it assumes it will be called
+with the C<$schema> object passed in.
 
 =head2 toposort_graph
 
