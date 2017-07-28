@@ -5,7 +5,7 @@ use 5.008_004;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.050002';
+our $VERSION = '0.050010';
 
 use Graph;
 
