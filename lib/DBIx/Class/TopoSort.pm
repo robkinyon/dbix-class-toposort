@@ -5,7 +5,7 @@ use 5.008_004;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.050010';
+our $VERSION = '0.050100';
 
 use Graph;
 
@@ -39,6 +39,12 @@ sub toposort_graph {
                 }
             }
         }
+    }
+
+    if ($opts{detect_cycle}) {
+        my @cycle = $g->find_a_cycle;
+        die 'Found circular relationships between [' . join(', ', @cycle) . ']'
+            if @cycle;
     }
 
     return $g;
@@ -146,6 +152,16 @@ names.
       Artist => [ qw/ first_album / ],
   },
 
+=item detect_cycle
+
+If this is true, then L<Graph/find_a_cycle> will be called and, if a cycle is
+found, this will die detailing the cycle found.
+
+This is useful because the L<Graph/toposort> method dies with a cyclic
+graph, but doesn't tell you what any of the cycles are that killed it.
+
+B<NOTE>: Finding cycles can be expensive. Don't do this on a regular basis.
+
 =back
 
 =head1 SEE ALSO
@@ -159,6 +175,10 @@ L<Graph/toposort>
 =item * Rob Kinyon <rob.kinyon@gmail.com>
 
 =back
+
+=head1 CONTRIBUTIONS
+
+Contributions have been generously donated by ZipRecruiter.
 
 =head1 LICENSE
 

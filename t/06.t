@@ -43,6 +43,9 @@ BEGIN {
 use Test::DBIx::Class qw(:resultsets);
 
 dies_ok { Schema->toposort() } 'toposort dies with a cycle';
+throws_ok {
+    Schema->toposort(detect_cycle => 1)
+} qr/Found circular relationships between \[(?:(?:Artist, Album)|(?:Album, Artist))\]/, 'detect_cycle shows the cycle';
 
 my @tables = Schema->toposort(skip => {
     'Artist' => [qw/ first_album /],
