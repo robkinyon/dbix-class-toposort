@@ -1,5 +1,7 @@
 requires 'DBIx::Class';
 requires 'Graph';
+requires 'JSON::Any';
+requires 'Memoize';
 
 on test => sub {
   requires 'Test::Exception'   => '0.21';

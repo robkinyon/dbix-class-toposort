@@ -9,6 +9,55 @@ our $VERSION = '0.050100';
 
 use Graph;
 
+# Even though JSON::MaybeXS is recommended, DBIx::Class already uses JSON::Any,
+# so we can depend on it existing in the world.
+# Note: We cannot use JSON::DWIW because it does not provide a canonical()
+# method. We need this in order to ensure the same hash is encoded the same way
+# every time. Otherwise, preserve the order provided.
+use JSON::Any qw(CPANEL XS JSON PP);
+use Memoize qw(memoize unmemoize);
+
+my $MEMOIZED = 0;
+sub enable_memoize {
+    unmemoize() if $MEMOIZED;
+
+    shift;
+    my ($normalizer) = @_;
+    $normalizer ||= sub {
+        my @keys = (
+            $$,
+        );
+
+        # toposort() could be called either as $schema->toposort(%opts) or as
+        # DBIx::Class::TopoSort->toposort($schema, %opts)
+        my $schema = shift;
+        unless (ref($schema) && $schema->isa('DBIx::Class::Schema')) {
+            $schema = shift;
+        }
+        # TODO: Waiting on a response from mst and ribasushi for what to do here
+        #push @keys, 
+
+        my %opts = @_;
+        if (%opts) {
+            push @keys, JSON::Any->new->canonical(1)->encode(\%opts);
+        }
+
+        return join ':', @keys;
+    };
+
+    $MEMOIZED = 1;
+    memoize('DBIx::Class::TopoSort::toposort',
+        NORMALIZER => $normalizer,
+    );
+}
+
+sub disable_memoize {
+    return unless $MEMOIZED;
+
+    unmemoize('DBIx::Class::TopoSort::toposort');
+    $MEMOIZED = 0;
+}
+
 sub toposort_graph {
     my $self = shift;
     my ($schema, %opts) = @_;
@@ -163,6 +212,28 @@ graph, but doesn't tell you what any of the cycles are that killed it.
 B<NOTE>: Finding cycles can be expensive. Don't do this on a regular basis.
 
 =back
+
+=head2 memoize (Class method)
+
+This will L<Memoize/memoize> the L</toposort> function. By default, it set a
+normalizer function that concatenates the following (in order):
+
+=over 4
+
+=item * The PID
+
+=item * The resultset_namespace (if any) provided to DBIx::Class
+
+=item * The canonicalized JSON of any options provided.
+
+=back
+
+You may pass in a different function if you need to.
+
+=head2 unmemoize (Class method)
+
+This will disable any memoize on L</toposort>. Unlike L<Memoize/unmemoize>, this
+will not croak if you haven't already memoized.
 
 =head1 SEE ALSO
 
