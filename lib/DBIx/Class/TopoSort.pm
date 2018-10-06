@@ -1,3 +1,4 @@
+# vim: set noai ts=4 sw=4:
 package DBIx::Class::TopoSort;
 
 use 5.008_004;
@@ -16,6 +17,7 @@ use Graph;
 # every time. Otherwise, preserve the order provided.
 use JSON::Any qw(CPANEL XS JSON PP);
 use Memoize qw(memoize unmemoize);
+use Scalar::Util qw(reftype);
 
 my $MEMOIZED = 0;
 sub enable_memoize {
@@ -34,8 +36,11 @@ sub enable_memoize {
         unless (ref($schema) && $schema->isa('DBIx::Class::Schema')) {
             $schema = shift;
         }
-        # TODO: Waiting on a response from mst and ribasushi for what to do here
-        #push @keys, 
+
+        # If you give me a $schema object, the graph is going to be the same
+        # for every instance of that schema, so we can use the schema's class
+        # for the anchor.
+        push @keys, reftype($schema);
 
         my %opts = @_;
         if (%opts) {

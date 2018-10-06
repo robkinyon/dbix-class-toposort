@@ -1,3 +1,4 @@
+# vim: set noai ts=4 sw=4:
 use strict;
 use warnings FATAL => 'all';
 
@@ -50,6 +51,15 @@ throws_ok {
 my @tables = Schema->toposort(skip => {
     'Artist' => [qw/ first_album /],
 });
+cmp_deeply( [@tables], ['Artist', 'Album'], "Connected tables are returned in has_many order" );
+
+@tables = Schema->toposort(
+    # Test that calling detect_cycle doesn't bomb if a cycle doesn't exist.
+    detect_cycle => 1,
+    skip => {
+        'Artist' => [qw/ first_album /],
+    },
+);
 cmp_deeply( [@tables], ['Artist', 'Album'], "Connected tables are returned in has_many order" );
 
 done_testing;
