@@ -20,8 +20,8 @@ use Memoize qw(memoize unmemoize);
 use Scalar::Util qw(reftype);
 
 my $MEMOIZED = 0;
-sub enable_memoize {
-    unmemoize() if $MEMOIZED;
+sub enable_toposort_memoize {
+    disable_toposort_memoize() if $MEMOIZED;
 
     shift;
     my ($normalizer) = @_;
@@ -42,6 +42,8 @@ sub enable_memoize {
         # for the anchor.
         push @keys, reftype($schema);
 
+        # We need to track the %opts provided because invocations with different
+        # parameters may result in different outputs.
         my %opts = @_;
         if (%opts) {
             push @keys, JSON::Any->new->canonical(1)->encode(\%opts);
@@ -56,11 +58,11 @@ sub enable_memoize {
     );
 }
 
-sub disable_memoize {
+sub disable_toposort_memoize {
     return unless $MEMOIZED;
 
-    unmemoize('DBIx::Class::TopoSort::toposort');
     $MEMOIZED = 0;
+    unmemoize('DBIx::Class::TopoSort::toposort');
 }
 
 sub toposort_graph {
@@ -218,16 +220,16 @@ B<NOTE>: Finding cycles can be expensive. Don't do this on a regular basis.
 
 =back
 
-=head2 memoize (Class method)
+=head2 enable_toposort_memoize (Class method)
 
-This will L<Memoize/memoize> the L</toposort> function. By default, it set a
+This will L<Memoize/memoize> the L</toposort> function. By default, it uses a
 normalizer function that concatenates the following (in order):
 
 =over 4
 
-=item * The PID
+=item * The PID of this process
 
-=item * The resultset_namespace (if any) provided to DBIx::Class
+=item * The class of the schema
 
 =item * The canonicalized JSON of any options provided.
 
@@ -235,7 +237,7 @@ normalizer function that concatenates the following (in order):
 
 You may pass in a different function if you need to.
 
-=head2 unmemoize (Class method)
+=head2 disable_toposort_memoize (Class method)
 
 This will disable any memoize on L</toposort>. Unlike L<Memoize/unmemoize>, this
 will not croak if you haven't already memoized.
