@@ -2,7 +2,7 @@
 blib/
 .build/
 _build/
-cover_db/
+cover_db*/
 inc/
 Build
 !Build/
